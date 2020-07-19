@@ -14,6 +14,8 @@ Important notes for submission:
   solution.
 """
 import datetime
+import functools
+import itertools
 import typing
 import re
 from operator import itemgetter
@@ -29,14 +31,28 @@ class ArticleField:
         pass
 
 
+@functools.total_ordering  # Let's take it the lazy way
 class Article:
     """The *sexy* `Article` class you need to write for the qualifier."""
+    id_counter = itertools.count()
 
     def __init__(self, title: str, author: str, publication_date: datetime.datetime, content: str) -> None:
         self.title = title
         self.author = author
         self.publication_date = publication_date
-        self.content = content
+        self._content = content
+
+        self.id = next(self.id_counter)
+        self.last_edited = None
+
+    @property
+    def content(self) -> str:
+        return self._content
+
+    @content.setter
+    def content(self, value: str) -> None:
+        self.last_edited = datetime.datetime.now()
+        self._content = value
 
     def short_introduction(self, n_characters: int) -> typing.Optional[str]:
         cuts = []
@@ -64,3 +80,15 @@ class Article:
 
     def __len__(self) -> int:
         return len(self.content)
+
+    def __lt__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        
+        return self.publication_date < other.publication_date
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+
+        return self.publication_date == other.publication_date
