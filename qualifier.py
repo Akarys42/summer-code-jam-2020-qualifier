@@ -15,6 +15,11 @@ Important notes for submission:
 """
 import datetime
 import typing
+import re
+from operator import itemgetter
+
+VALID_CUTS = (' ', '\n')
+WORDS_RE = re.compile("[^a-zA-Z]")
 
 
 class ArticleField:
@@ -25,7 +30,37 @@ class ArticleField:
 
 
 class Article:
-    """The `Article` class you need to write for the qualifier."""
+    """The *sexy* `Article` class you need to write for the qualifier."""
 
-    def __init__(self, title: str, author: str, publication_date: datetime.datetime, content: str):
-        pass
+    def __init__(self, title: str, author: str, publication_date: datetime.datetime, content: str) -> None:
+        self.title = title
+        self.author = author
+        self.publication_date = publication_date
+        self.content = content
+
+    def short_introduction(self, n_characters: int) -> typing.Optional[str]:
+        cuts = []
+
+        for i, c in enumerate(self.content):
+            if i < n_characters and c in VALID_CUTS:
+                cuts.append(i)
+
+        return self.content[:cuts[-1]]
+
+    def most_common_words(self, n_words: int) -> typing.Dict[str, int]:
+        d = {}
+
+        for word in WORDS_RE.split(self.content):
+            if word:  # The regex can sometimes output an empty string
+                d[word.lower()] = d.get(word.lower(), 0) + 1
+
+        return {k: v for k, v in sorted(d.items(), key=itemgetter(1), reverse=True)[:n_words]}
+
+    def __repr__(self) -> str:
+        return (
+            f"<{self.__class__.__name__} title={repr(self.title)} author={repr(self.author)} " 
+            f"publication_date={repr(self.publication_date.isoformat())}>"
+        )
+
+    def __len__(self) -> int:
+        return len(self.content)
