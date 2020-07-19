@@ -3,15 +3,11 @@ Use this file to write your solution for the Summer Code Jam 2020 Qualifier.
 
 Important notes for submission:
 
-- Do not change the names of the two classes included below. The test suite we
-  will use to test your submission relies on existence these two classes.
+- The lemon is a lie
 
-- You can leave the `ArticleField` class as-is if you do not wish to tackle the
-  advanced requirements.
+- Akarys likes cookies
 
-- Do not include "debug"-code in your submission. This means that you should
-  remove all debug prints and other debug statements before you submit your
-  solution.
+- Joe and Ves are nice bois
 """
 import datetime
 import functools
@@ -28,7 +24,24 @@ class ArticleField:
     """The `ArticleField` class for the Advanced Requirements."""
 
     def __init__(self, field_type: typing.Type[typing.Any]):
-        pass
+        self.field_type = field_type
+        self.data = {}
+        self.name = '<Unknown>'
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, instance, owner=None):
+        return self.data[instance]
+
+    def __set__(self, instance, value):
+        if not isinstance(value, self.field_type):
+            raise TypeError(
+                f"expected an instance of type '{self.field_type.__name__}' "
+                f"for attribute '{self.name}', got '{value.__class__.__name__}' instead"
+            )
+
+        self.data[instance] = value
 
 
 @functools.total_ordering  # Let's take it the lazy way
